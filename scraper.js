@@ -1,8 +1,11 @@
 const fs = require('fs');
+const path = require('path');
+const glob = require('glob');
 const https = require('https');
 const entities = require('html-entities');
 const cliProgress = require('cli-progress');
-const path = require('path');
+
+let destinationDir = '';
 
 let ac = null;
 const getAbortSignal = () => ac.signal;
@@ -18,9 +21,10 @@ const multibar = new cliProgress.MultiBar(
 
 const downloadFile = (url, name, destination, bar, win) =>
 	new Promise((resolve, reject) => {
-		if (fs.existsSync(destination)) {
-			console.log(`skipping ${destination}, it already exists`);
-			resolve(`skipping ${destination}, it already exists`);
+		const unTmpedDestination = destination.substring(0, destination.length - 4);
+		if (fs.existsSync(unTmpedDestination)) {
+			console.log(`skipping ${unTmpedDestination}, it already exists`);
+			resolve(`skipping ${unTmpedDestination}, it already exists`);
 			return;
 		}
 
@@ -53,6 +57,12 @@ const downloadFile = (url, name, destination, bar, win) =>
 			});
 			res.on('end', () => {
 				resolve('file downloaded');
+				fs.rename(destination, unTmpedDestination, (err) => {
+					if (err) {
+						console.log(err);
+						throw err;
+					}
+				});
 			});
 			res.pipe(writable);
 		});
@@ -124,7 +134,7 @@ const startDownload = (url, dest, win) => {
 			}
 		});
 
-		let destinationDir = path.join(dest[0], albumTitle);
+		destinationDir = path.join(dest[0], albumTitle);
 
 		if (!fs.existsSync(destinationDir)) {
 			fs.mkdirSync(destinationDir, { recursive: true }, (err) => {
@@ -143,7 +153,7 @@ const startDownload = (url, dest, win) => {
 					downloadFile(
 						el.url,
 						el.trackName,
-						path.join(destinationDir, `${el.trackName}.mp3`),
+						path.join(destinationDir, `${el.trackName}.mp3.tmp`),
 						bar,
 						win
 					)
@@ -157,7 +167,7 @@ const startDownload = (url, dest, win) => {
 				downloadFile(
 					coverImgUrl,
 					'cover',
-					path.join(destinationDir, 'cover.jpg'),
+					path.join(destinationDir, 'cover.jpg.tmp'),
 					bar,
 					win
 				)
@@ -180,6 +190,16 @@ const startDownload = (url, dest, win) => {
 
 const cancelDownload = () => {
 	ac.abort();
+	glob(`${destinationDir}/*.tmp`, (err, files) => {
+		files.forEach((file) => {
+			fs.rm(file, (err) => {
+				if (err) {
+					console.log(err);
+					throw err;
+				}
+			});
+		});
+	});
 };
 
 module.exports = {

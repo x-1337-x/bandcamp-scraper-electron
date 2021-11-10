@@ -26,6 +26,7 @@ ipcRenderer.on('downloadFInished', (event, arg) => {
 });
 
 ipcRenderer.on('downloadCancelled', (event, arg) => {
+	// progressDiv.innerHTML = '';
 	downloading = false;
 	dowloadToggleBtn.innerText = 'Start Download';
 	downloadStatusSpan.innerText = arg;
