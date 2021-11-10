@@ -41,12 +41,9 @@ app.on('window-all-closed', () => {
 });
 
 ipcMain.on('openFolderSelectDialog', (event, arg) => {
-	console.log(arg);
 	dialog
 		.showOpenDialog({ properties: ['openDirectory', 'multiSelections'] })
 		.then((result) => {
-			console.log(result.canceled);
-			console.log(result.filePaths);
 			destinationFolder = result.filePaths;
 			event.reply('onFolderSelect', result.filePaths);
 		})
@@ -79,8 +76,8 @@ ipcMain.on('openUrlSelectPrompt', (event, arg) => {
 });
 
 ipcMain.on('startDownload', (event, arg) => {
+	event.reply('downloadStarted', 'download started');
 	scraper.startDownload(url, destinationFolder, win).then((values) => {
-		console.log(values);
 		event.reply('downloadFInished', 'All done.');
 	});
 });

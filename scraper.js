@@ -21,6 +21,7 @@ const downloadFile = (url, name, destination, bar, win) =>
 		if (fs.existsSync(destination)) {
 			console.log(`skipping ${destination}, it already exists`);
 			resolve(`skipping ${destination}, it already exists`);
+			return;
 		}
 
 		let receivedBytes = 0;
@@ -114,12 +115,14 @@ const startDownload = (url, dest, win) => {
 		const albumTitle = json.current['title'];
 		const trackList = [];
 
-		json.trackinfo.forEach((el) =>
-			trackList.push({
-				trackName: el.title,
-				url: el.file['mp3-128'],
-			})
-		);
+		json.trackinfo.forEach((el) => {
+			if (el.title && el.file) {
+				trackList.push({
+					trackName: el.title,
+					url: el.file['mp3-128'],
+				});
+			}
+		});
 
 		let destinationDir = path.join(dest[0], albumTitle);
 
