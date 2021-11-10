@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Hello World!</title>
+    <meta http-equiv="Content-Security-Policy" content="script-src 'self' 'unsafe-inline';" />
+</head>
+<body>
+    <h1>Hello World!</h1>
+    <p>
+        We are using Node.js <span id="node-version"></span>,
+        Chromium <span id="chrome-version"></span>,
+        and Electron <span id="electron-version"></span>.
+    </p>
+    <div id="pathBlock">
+        <button id="selectPath">Select Download Path</button>
+        <span id="path"></span>
+    </div>
+    <div id="urlBlock">
+        <button id="selectUrl">Set Album Url</button>
+        <span id="albumUrl"></span>
+    </div>
+    <div id="downloadBlock">
+        <button id="dowloadToggle">Start Download</button>
+        <span id="downloadStatus"></span>
+    </div>
+    <div id="progressDiv">
+
+    </div>
+</body>
+<script src="./app.js"></script>
+</html>

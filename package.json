@@ -1,0 +1,20 @@
+{
+  "name": "bandcamp-scraper-electron",
+  "version": "1.0.0",
+  "description": "bandcamp sound scraper",
+  "main": "main.js",
+  "scripts": {
+    "start": "electron .",
+    "test": "test"
+  },
+  "author": "x-1337-x",
+  "license": "ISC",
+  "devDependencies": {
+    "electron": "^15.3.0"
+  },
+  "dependencies": {
+    "cli-progress": "^3.9.1",
+    "electron-prompt": "^1.7.0",
+    "html-entities": "^2.3.2"
+  }
+}
