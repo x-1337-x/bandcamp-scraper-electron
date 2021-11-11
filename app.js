@@ -15,8 +15,16 @@ ipcRenderer.on('onFolderSelect', (event, arg) => {
 	pathSpan.innerText = `${arg[0]}`;
 });
 
+ipcRenderer.on('pathError', (event, arg) => {
+	downloadStatusSpan.innerText = arg;
+});
+
 ipcRenderer.on('onUrlSelect', (event, arg) => {
 	urlSpan.innerText = `${arg}`;
+});
+
+ipcRenderer.on('urlError', (event, arg) => {
+	downloadStatusSpan.innerText = arg;
 });
 
 ipcRenderer.on('downloadFInished', (event, arg) => {
@@ -32,6 +40,12 @@ ipcRenderer.on('downloadCancelled', (event, arg) => {
 	downloadStatusSpan.innerText = arg;
 });
 
+ipcRenderer.on('downloadError', (event, arg) => {
+	downloading = false;
+	downloadStatusSpan.innerText = arg;
+	dowloadToggleBtn.innerText = 'Start Download';
+});
+
 ipcRenderer.on('downloadList', (event, arg) => {
 	progressDiv.innerHTML = '';
 	arg.forEach((el) => {
@@ -45,7 +59,7 @@ ipcRenderer.on('downloadList', (event, arg) => {
 ipcRenderer.on('progress', (event, arg) => {
 	document.getElementById(
 		arg.filename
-	).innerText = `${arg.filename}, ${arg.progress}`;
+	).innerText = `${arg.filename}, ${arg.progress}%`;
 });
 
 ipcRenderer.on('downloadStarted', (event, arg) => {

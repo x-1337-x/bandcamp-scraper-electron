@@ -76,8 +76,23 @@ ipcMain.on('openUrlSelectPrompt', (event, arg) => {
 });
 
 ipcMain.on('startDownload', (event, arg) => {
+	if (typeof destinationFolder[0] !== 'string' || destinationFolder[0] === '') {
+		event.reply('pathError', 'Select destination folder and try again.');
+		return;
+	}
+	if (typeof url !== 'string' || url === '') {
+		event.reply(
+			'urlError',
+			'Provide a valid bandcamp album url and try again.'
+		);
+		return;
+	}
 	event.reply('downloadStarted', 'download started');
 	scraper.startDownload(url, destinationFolder, win).then((values) => {
+		if (!values) {
+			event.reply('downloadError', 'Unable to download.');
+			return;
+		}
 		event.reply('downloadFInished', 'All done.');
 	});
 });

@@ -115,77 +115,79 @@ const startDownload = (url, dest, win) => {
 		{ once: true }
 	);
 
-	return getPageSource(url).then((data) => {
-		const result = JSON_STRING_RE.exec(data);
-		const jsonString = entities.decode(result[1]);
-		const json = JSON.parse(jsonString);
+	return getPageSource(url)
+		.then((data) => {
+			const result = JSON_STRING_RE.exec(data);
+			const jsonString = entities.decode(result[1]);
+			const json = JSON.parse(jsonString);
 
-		const coverImgUrl = COVER_IMG_RE.exec(data)[1];
+			const coverImgUrl = COVER_IMG_RE.exec(data)[1];
 
-		const albumTitle = json.current['title'];
-		const trackList = [];
+			const albumTitle = json.current['title'];
+			const trackList = [];
 
-		json.trackinfo.forEach((el) => {
-			if (el.title && el.file) {
-				trackList.push({
-					trackName: el.title,
-					url: el.file['mp3-128'],
-				});
-			}
-		});
-
-		destinationDir = path.join(dest[0], albumTitle);
-
-		if (!fs.existsSync(destinationDir)) {
-			fs.mkdirSync(destinationDir, { recursive: true }, (err) => {
-				if (err) {
-					throw err;
+			json.trackinfo.forEach((el) => {
+				if (el.title && el.file) {
+					trackList.push({
+						trackName: el.title,
+						url: el.file['mp3-128'],
+					});
 				}
 			});
-		}
 
-		const promises = [];
+			destinationDir = path.join(dest[0], albumTitle);
 
-		if (trackList.length > 0) {
-			trackList.forEach((el) => {
-				const bar = multibar.create(100, 0, { filename: `${el.trackName}` });
+			if (!fs.existsSync(destinationDir)) {
+				fs.mkdirSync(destinationDir, { recursive: true }, (err) => {
+					if (err) {
+						throw err;
+					}
+				});
+			}
+
+			const promises = [];
+
+			if (trackList.length > 0) {
+				trackList.forEach((el) => {
+					const bar = multibar.create(100, 0, { filename: `${el.trackName}` });
+					promises.push(
+						downloadFile(
+							el.url,
+							el.trackName,
+							path.join(destinationDir, `${el.trackName}.mp3.tmp`),
+							bar,
+							win
+						)
+					);
+				});
+			}
+
+			if (coverImgUrl) {
+				const bar = multibar.create(100, 0, { filename: 'cover' });
 				promises.push(
 					downloadFile(
-						el.url,
-						el.trackName,
-						path.join(destinationDir, `${el.trackName}.mp3.tmp`),
+						coverImgUrl,
+						'cover',
+						path.join(destinationDir, 'cover.jpg.tmp'),
 						bar,
 						win
 					)
 				);
+			}
+
+			const fileList = [];
+
+			trackList.forEach((el) => {
+				fileList.push(el.trackName);
 			});
-		}
 
-		if (coverImgUrl) {
-			const bar = multibar.create(100, 0, { filename: 'cover' });
-			promises.push(
-				downloadFile(
-					coverImgUrl,
-					'cover',
-					path.join(destinationDir, 'cover.jpg.tmp'),
-					bar,
-					win
-				)
-			);
-		}
+			fileList.push('cover');
 
-		const fileList = [];
+			win.webContents.send('downloadList', fileList);
 
-		trackList.forEach((el) => {
-			fileList.push(el.trackName);
-		});
-
-		fileList.push('cover');
-
-		win.webContents.send('downloadList', fileList);
-
-		return Promise.allSettled(promises);
-	});
+			return Promise.allSettled(promises);
+		})
+		.catch((err) => console.error(err));
 };
 
 const cancelDownload = () => {
