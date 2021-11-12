@@ -77,7 +77,7 @@ ipcMain.on('openUrlSelectPrompt', (event, arg) => {
 
 ipcMain.on('startDownload', (event, arg) => {
 	if (typeof destinationFolder[0] !== 'string' || destinationFolder[0] === '') {
-		event.reply('pathError', 'Select destination folder and try again.');
+		event.reply('pathError', 'Select a  destination folder and try again.');
 		return;
 	}
 	if (typeof url !== 'string' || url === '') {
